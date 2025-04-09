@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from typing import Optional
 from ..models.company_model import Company
 from ..schemas.company_schema import CompanyCreate
 
@@ -10,18 +11,24 @@ async def create_company(db: AsyncSession, company: CompanyCreate):
     await db.refresh(new_company)
     return new_company
 
-async def get_companies(db: AsyncSession, page: int = 1, size: int = 10):
+async def get_companies(db: AsyncSession, page: int = 1, size: int = 10, name: Optional[str] = None):
     offset = (page - 1) * size
 
-    query = select(Company).limit(size).offset(offset)
-    
+    query = select(Company)
+
+    if name:
+        query = query.where(Company.name.ilike(f"%{name}%"))
+
+    query = query.limit(size).offset(offset)
+
     result = await db.execute(query)
     companies = result.scalars().all()
-    
-    if not companies:
-        return {"companies": [], "page": page, "size": size, "total_companies": 0, "total_pages": 0}
-    
-    total_result = await db.execute(select(func.count(Company.id)))
+
+    total_query = select(func.count(Company.id))
+    if name:
+        total_query = total_query.where(Company.name.ilike(f"%{name}%"))
+
+    total_result = await db.execute(total_query)
     total_companies = total_result.scalar()
 
     total_pages = (total_companies + size - 1) // size  # Round up division
@@ -34,6 +41,18 @@ async def get_companies(db: AsyncSession, page: int = 1, size: int = 10):
         "total_pages": total_pages,
     }
 
+
+async def update_company(db: AsyncSession, company_id: int, company_data):
+    company = await db.get(Company, company_id)
+    if not company:
+        return None
+
+    for key, value in company_data.model_dump(exclude_unset=True).items():
+        setattr(company, key, value)
+
+    await db.commit()
+    await db.refresh(company)
+    return company
 
 async def delete_company(db: AsyncSession, company_id: int):
     result = await db.execute(select(Company).filter(Company.id == company_id))

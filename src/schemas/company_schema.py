@@ -1,4 +1,5 @@
 from pydantic import BaseModel, field_validator
+from typing import Optional
 
 class CompanyBase(BaseModel):
     name: str
@@ -18,6 +19,10 @@ class CompanyBase(BaseModel):
 class CompanyCreate(CompanyBase):
     pass
 
+class CompanyUpdate(BaseModel):
+    name: Optional[str] = None
+    city: Optional[str] = None
+
 class CompanyResponse(CompanyBase):
     id: int
 
@@ -30,3 +35,6 @@ class PaginatedCompanyResponse(BaseModel):
     size: int
     total_companies: int
     total_pages: int
+
+    class Config:
+        orm_true: True
