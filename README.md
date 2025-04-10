@@ -63,8 +63,9 @@ PingCRM migration as a test
 ## 🌐 Deployment
 Deployment URLs
 
-- **Backend:** [Railway] [https://graph8-fastapi-production.up.railway.app](Click)
-- **Frontend:** [Vercel] [https://graph8-migration.netlify.app/](Click)
+- **Backend:** [Railway](https://graph8-fastapi-production.up.railway.app)
+- **Frontend:** [Netlify](https://graph8-migration.netlify.app/)
+
 
 ## ⏳ Time Spent
 Approximately **5 to 5.5 hours**.
