@@ -57,7 +57,7 @@ PingCRM migration as a test
    The frontend will start running on **http://localhost:3000**.
 
 ## 🛠️ Tech Stack
-- **Backend:** FastAPI, SQLAlchemy, PostgreSQL (Supabase)
+- **Backend:** FastAPI, SQLAlchemy, PostgreSQL (Supabase), Pydantic, Psycopg3 for async connection
 - **Frontend:** React, TypeScript, Axios, React Query, ShadCN (UI)
 
 ## 🌐 Deployment
