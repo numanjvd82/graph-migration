@@ -3,13 +3,23 @@ from sqlalchemy import select, func
 from typing import Optional
 from ..models.company_model import Company
 from ..schemas.company_schema import CompanyCreate
+import logging
+
+from fastapi import HTTPException
+import logging
 
 async def create_company(db: AsyncSession, company: CompanyCreate):
-    new_company = Company(**company.model_dump())
-    db.add(new_company)
-    await db.commit()  
-    await db.refresh(new_company)
-    return new_company
+    try:
+        new_company = Company(**company.model_dump())  
+        db.add(new_company)
+        await db.commit()  
+        await db.refresh(new_company)  
+        
+        return new_company 
+    except Exception as e:
+        logging.error(f"Error creating company: {e}") 
+        raise HTTPException(status_code=500, detail="Internal server error while creating company")  
+
 
 async def get_companies(db: AsyncSession, page: int = 1, size: int = 10, name: Optional[str] = None):
     offset = (page - 1) * size
@@ -42,17 +52,28 @@ async def get_companies(db: AsyncSession, page: int = 1, size: int = 10, name: O
     }
 
 
+
 async def update_company(db: AsyncSession, company_id: int, company_data):
-    company = await db.get(Company, company_id)
-    if not company:
+    try:
+        company = await db.get(Company, company_id)
+        if not company:
+            return None
+
+
+        for key, value in company_data.model_dump(exclude_unset=True).items():
+            setattr(company, key, value)
+
+
+        await db.flush()  # Ensure changes are staged
+        await db.commit()
+        await db.refresh(company)
+
+        return company
+    
+    except Exception as e:
+        await db.rollback()  
         return None
 
-    for key, value in company_data.model_dump(exclude_unset=True).items():
-        setattr(company, key, value)
-
-    await db.commit()
-    await db.refresh(company)
-    return company
 
 async def delete_company(db: AsyncSession, company_id: int):
     result = await db.execute(select(Company).filter(Company.id == company_id))
