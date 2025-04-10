@@ -21,7 +21,7 @@ class ContactResponse(ContactBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PaginatedContactResponse(BaseModel):
     contacts: List[ContactResponse]
@@ -31,4 +31,4 @@ class PaginatedContactResponse(BaseModel):
     total_pages: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -37,4 +37,4 @@ class PaginatedCompanyResponse(BaseModel):
     total_pages: int
 
     class Config:
-        orm_true: True
+        from_attributes = True
